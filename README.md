@@ -1,4 +1,4 @@
-# VPN Site-to-Site (based on policy)
+# VPN Site-to-Site (based on policy) IKEv1
 ## Información del Proyecto
 ---
 
