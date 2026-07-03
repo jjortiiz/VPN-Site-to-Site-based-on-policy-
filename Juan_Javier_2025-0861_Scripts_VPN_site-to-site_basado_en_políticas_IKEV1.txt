@@ -1,0 +1,285 @@
+ISP
+enable
+configure terminal
+hostname ISP
+no ip domain-lookup
+
+interface e0/0
+description CONEXION_R1
+ip add 198.50.100.1 255.255.255.252
+no shutdown
+exit
+
+interface e0/1
+description CONEXION_R2
+ip add 198.50.100.5 255.255.255.252
+no shutdown
+exit
+
+
+
+**************************************************************************************************
+
+R1
+
+enable
+configure terminal
+hostname R1
+no ip domain-lookup
+
+banner motd #
+************************************
+*     SOLO PERSONAL AUTORIZADO     * 
+*    El acceso esta restringido    *
+*      Underwater Incorporated     *
+************************************
+#
+
+interface e0/1
+description CONEXION_ISP
+ip add 198.50.100.2 255.255.255.252
+no shutdown
+exit
+
+interface e0/0
+no shutdown
+exit
+
+interface e0/0.10
+encapsulation dot1q 10
+description VLAN_Gestion
+ip address 8.61.10.1 255.255.255.128
+exit
+
+interface e0/0.20
+encapsulation dot1q 20
+description VLAN_Finanzas
+ip address 8.61.10.129 255.255.255.128
+exit
+
+ip dhcp excluded-address 8.61.10.1 
+ip dhcp pool GESTION
+network 8.61.10.0 255.255.255.128
+default-router 8.61.10.1
+dns-server 8.8.8.8
+domain-name underwater.com
+
+ip dhcp excluded-address 8.61.10.129 
+ip dhcp pool FINANZAS
+network 8.61.10.128 255.255.255.128
+default-router 8.61.10.129
+dns-server 8.8.8.8
+domain-name underwater.com
+
+ip route 0.0.0.0 0.0.0.0 198.50.100.1
+access-list 100 permit ip 8.61.10.0 0.0.0.255 8.61.20.0 0.0.0.255
+
+crypto isakmp policy 10
+encryption aes 256
+hash sha256
+authentication pre-share
+group 14
+exit
+crypto isakmp key Welcome* address 198.50.100.6
+
+crypto ipsec transform-set TS_VPN esp-aes 256 esp-sha256-hmac
+mode tunnel
+exit
+
+crypto map CMAP_VPN 10 ipsec-isakmp
+set peer 198.50.100.6
+set transform-set TS_VPN
+match address 100
+exit
+
+interface e0/1
+crypto map CMAP_VPN
+exit
+
+**************************************************************************************************
+
+
+SW1
+
+enable
+configure terminal
+hostname SW1
+no ip domain-lookup
+
+banner motd #
+************************************
+*     SOLO PERSONAL AUTORIZADO     * 
+*    El acceso esta restringido    *
+*      Underwater Incorporated     *
+************************************
+#
+
+vlan 10
+name GESTION
+vlan 20
+name FINANZAS
+vlan 666
+name BLACKHULL
+exit
+
+interface e0/0
+description CONEXION_R1
+duplex half
+switchport trunk encapsulation dot1q
+switchport mode trunk
+exit
+
+interface e0/1
+description Acceso_VLAN_10
+switchport mode access
+switchport access vlan 10
+exit
+
+interface e0/2
+description Acceso_VLAN_20
+switchport mode access
+switchport access vlan 20
+exit
+
+interface e0/3
+description PUERTO_SIN_USAR
+switchport mode access
+switchport access vlan 20
+shutdown
+exit
+
+
+
+**************************************************************************************************
+
+R2
+
+enable
+configure terminal
+hostname R2
+no ip domain-lookup
+
+banner motd #
+************************************
+*     SOLO PERSONAL AUTORIZADO     * 
+*    El acceso esta restringido    *
+*      Underwater Incorporated     *
+************************************
+#
+
+interface e0/1
+description CONEXION_ISP
+ip add 198.50.100.6 255.255.255.252
+no shutdown
+exit
+
+interface e0/0
+no shutdown
+exit
+
+interface e0/0.30
+encapsulation dot1q 30
+description VLAN_Ventas
+ip address 8.61.20.1 255.255.255.128
+exit
+
+interface e0/0.40
+encapsulation dot1q 40
+description VLAN_Compras
+ip address 8.61.20.129 255.255.255.128
+exit
+
+ip dhcp excluded-address 8.61.20.1 
+ip dhcp pool VENTAS
+network 8.61.20.0 255.255.255.128
+default-router 8.61.20.1
+dns-server 8.8.8.8
+domain-name underwater.com
+
+ip dhcp excluded-address 8.61.20.129 
+ip dhcp pool COMPRAS
+network 8.61.20.128 255.255.255.128
+default-router 8.61.20.129
+dns-server 8.8.8.8
+domain-name underwater.com
+
+ip route 0.0.0.0 0.0.0.0 198.50.100.5
+access-list 100 permit ip 8.61.20.0 0.0.0.255 8.61.10.0 0.0.0.255
+
+crypto isakmp policy 10
+encryption aes 256
+hash sha256
+authentication pre-share
+group 14
+exit
+crypto isakmp key Welcome* address 198.50.100.2
+
+crypto ipsec transform-set TS_VPN esp-aes 256 esp-sha256-hmac
+mode tunnel
+exit
+
+crypto map CMAP_VPN 10 ipsec-isakmp
+set peer 198.50.100.2
+set transform-set TS_VPN
+match address 100
+exit
+
+interface e0/1
+crypto map CMAP_VPN
+exit
+
+
+**************************************************************************************************
+
+
+SW2
+
+enable
+configure terminal
+hostname SW2
+no ip domain-lookup
+
+banner motd #
+************************************
+*     SOLO PERSONAL AUTORIZADO     * 
+*    El acceso esta restringido    *
+*      Underwater Incorporated     *
+************************************
+#
+
+vlan 30
+name VENTAS
+vlan 40
+name COMPRAS
+vlan 666
+name BLACKHULL
+exit
+
+interface e0/0
+description CONEXION_R2
+duplex half
+switchport trunk encapsulation dot1q
+switchport mode trunk
+exit
+
+interface e0/1
+description Acceso_VLAN_30
+switchport mode access
+switchport access vlan 30
+exit
+
+interface e0/2
+description Acceso_VLAN_40
+switchport mode access
+switchport access vlan 40
+exit
+
+interface e0/3
+description PUERTO_SIN_USAR
+switchport mode access
+switchport access vlan 666
+shutdown
+exit
+
+
+
