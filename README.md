@@ -12,8 +12,8 @@
 
 ---
 
-## Importante
-* Favor validar en los archivos cargados donde se encuentran:
+### Importante
+Favor validar en los archivos cargados donde se encuentran:
 * Scripts de configuracion
 * Documentacion Tecnica
 * Archivo unico con enlace a todos los videos de la practica
